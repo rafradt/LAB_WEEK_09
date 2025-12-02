@@ -59,7 +59,6 @@ fun Home(
     }
 
     var inputField by remember { mutableStateOf("") }
-
     val moshi = Moshi.Builder().build()
     val type = Types.newParameterizedType(List::class.java, Student::class.java)
     val adapter = moshi.adapter<List<Student>>(type)
