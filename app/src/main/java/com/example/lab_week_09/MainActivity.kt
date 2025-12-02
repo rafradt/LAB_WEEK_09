@@ -22,6 +22,8 @@ import com.example.lab_week_09.ui.theme.OnBackgroundItemText
 import com.example.lab_week_09.ui.theme.OnBackgroundTitleText
 import com.example.lab_week_09.ui.theme.PrimaryTextButton
 import com.example.lab_week_09.ui.theme.App
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,18 +58,25 @@ fun Home(
         )
     }
 
-    var inputField by remember { mutableStateOf(Student("")) }
+    var inputField by remember { mutableStateOf("") }
+
+    val moshi = Moshi.Builder().build()
+    val type = Types.newParameterizedType(List::class.java, Student::class.java)
+    val adapter = moshi.adapter<List<Student>>(type)
 
     HomeContent(
         listData = listData,
         inputField = inputField,
-        onInputValueChange = { inputField = inputField.copy(name = it) },
+        onInputValueChange = { inputField = it },
         onButtonClick = {
-            listData.add(inputField)
-            inputField = Student("")
+            if (inputField.isNotBlank()) {
+                listData.add(Student(inputField))
+                inputField = ""
+            }
         },
         navigateFromHomeToResult = {
-            navigateFromHomeToResult(listData.toList().toString())
+            val json = adapter.toJson(listData.toList())
+            navigateFromHomeToResult(json)
         }
     )
 }
@@ -75,7 +84,7 @@ fun Home(
 @Composable
 fun HomeContent(
     listData: SnapshotStateList<Student>,
-    inputField: Student,
+    inputField: String,
     onInputValueChange: (String) -> Unit,
     onButtonClick: () -> Unit,
     navigateFromHomeToResult: () -> Unit
@@ -92,19 +101,19 @@ fun HomeContent(
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                OnBackgroundTitleText(text = stringResource(id = R.string.enter_item))
+                OnBackgroundTitleText(text = "Enter Student Name")
 
                 TextField(
-                    value = inputField.name,
+                    value = inputField,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     onValueChange = { onInputValueChange(it) }
                 )
 
                 Row {
-                    PrimaryTextButton(text = stringResource(id = R.string.button_click)) {
+                    PrimaryTextButton(text = "Add") {
                         onButtonClick()
                     }
-                    PrimaryTextButton(text = stringResource(id = R.string.button_navigate)) {
+                    PrimaryTextButton(text = "Result") {
                         navigateFromHomeToResult()
                     }
                 }
@@ -123,14 +132,25 @@ fun HomeContent(
         }
     }
 }
+
 @Composable
 fun ResultContent(listData: String) {
-    Column(
+
+    val moshi = Moshi.Builder().build()
+    val type = Types.newParameterizedType(List::class.java, Student::class.java)
+    val adapter = moshi.adapter<List<Student>>(type)
+
+    val students = adapter.fromJson(listData) ?: emptyList()
+
+    LazyColumn(
         modifier = Modifier
-            .padding(vertical = 4.dp)
+            .padding(16.dp)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OnBackgroundItemText(text = listData)
+        items(students) { student ->
+            OnBackgroundItemText(text = student.name)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
