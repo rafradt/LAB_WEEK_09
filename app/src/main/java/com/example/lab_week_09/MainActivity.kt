@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,6 +18,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lab_week_09.ui.theme.LAB_WEEK_09Theme
+import com.example.lab_week_09.ui.theme.OnBackgroundTitleText
+import com.example.lab_week_09.ui.theme.PrimaryTextButton
+import com.example.lab_week_09.ui.theme.OnBackgroundItemText
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,28 +80,26 @@ fun HomeContent(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+
         item {
             Column(
-                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Text(text = stringResource(id = R.string.enter_item))
+                OnBackgroundTitleText(
+                    text = stringResource(id = R.string.enter_item)
+                )
 
                 TextField(
-                    value = inputField,
+                    value = inputField,   // FIXED: sebelumnya inputField.name
                     onValueChange = onInputValueChange,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Button(
-                    onClick = onButtonClick,
-                    modifier = Modifier.padding(top = 8.dp)
+                PrimaryTextButton(
+                    text = stringResource(id = R.string.button_click)
                 ) {
-                    Text(text = stringResource(id = R.string.button_click))
+                    onButtonClick()
                 }
             }
         }
@@ -104,11 +107,11 @@ fun HomeContent(
         items(listData) { item ->
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 4.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = item.name)
+                OnBackgroundItemText(text = item.name)
             }
         }
     }
